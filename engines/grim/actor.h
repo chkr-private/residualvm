@@ -462,6 +462,10 @@ public:
 	void popCostume();
 	void clearCostumes();
 	Costume *getCurrentCostume() const;
+	void setLocalAlphaMode(int vertex, AlphaMode alphamode);
+	void setLocalAlpha(int vertex, float alpha);
+	bool hasLocalAlpha() const;
+	float getLocalAlpha(int vertex) const;
 	Costume *findCostume(const Common::String &name);
 	int getCostumeStackDepth() const {
 		return _costumeStack.size();
@@ -710,6 +714,9 @@ private:
 	LightMode _lightMode;
 
 	Common::List<ObjectPtr<Material> > _materials;
+
+	Common::HashMap<int, float> _localAlpha;
+	Common::HashMap<int, int> _localAlphaMode;
 };
 
 } // end of namespace Grim

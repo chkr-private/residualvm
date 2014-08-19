@@ -261,6 +261,18 @@ void Actor::saveState(SaveGame *savedState) const {
 		}
 
 		savedState->writeLESint32(_lookAtActor);
+
+		savedState->writeLEUint32(_localAlphaMode.size());
+		for (Common::HashMap<int, int>::const_iterator i = _localAlphaMode.begin(); i != _localAlphaMode.end(); ++i) {
+			savedState->writeLESint32((i->_key));
+			savedState->writeLESint32((i->_value));
+		}
+
+		savedState->writeLEUint32(_localAlpha.size());
+		for (Common::HashMap<int, float>::const_iterator i = _localAlpha.begin(); i != _localAlpha.end(); ++i) {
+			savedState->writeLESint32((i->_key));
+			savedState->writeFloat((i->_value));
+		}
 	}
 
 	savedState->writeBool(_drawnToClean);
@@ -456,6 +468,24 @@ bool Actor::restoreState(SaveGame *savedState) {
 
 		if (savedState->saveMinorVersion() >= 17)
 			_lookAtActor = savedState->readLESint32();
+
+		if (savedState->saveMinorVersion() >= 25) {
+			_localAlphaMode.clear();
+			size = savedState->readLEUint32();
+			for (unsigned int i = 0; i < size; i++) {
+				int key = savedState->readLESint32();
+				int value = savedState->readLESint32();
+				_localAlphaMode[key] = value;
+			}
+
+			_localAlpha.clear();
+			size = savedState->readLEUint32();
+			for (unsigned int i = 0; i < size; i++) {
+				int key = savedState->readLESint32();
+				int value = savedState->readFloat();
+				_localAlpha[key] = value;
+			}
+		}
 	}
 
 	if (_cleanBuffer) {
@@ -1948,6 +1978,33 @@ Math::Vector3d Actor::getTangentPos(const Math::Vector3d &pos, const Math::Vecto
 //  }
 
 	return dest;
+}
+
+void Actor::setLocalAlpha(int vertex, float alpha) {
+	_localAlpha[vertex] = alpha;
+}
+
+void Actor::setLocalAlphaMode(int vertex, AlphaMode alphamode) {
+	if (alphamode == Actor::AlphaOff) {
+		_localAlphaMode.erase(vertex);
+	} else {
+		_localAlphaMode[vertex] = alphamode;
+	}
+}
+
+bool Actor::hasLocalAlpha() const {
+	return _localAlphaMode.size();
+}
+
+float Actor::getLocalAlpha(int vertex) const {
+	if (hasLocalAlpha() &&
+	    _localAlphaMode.contains(vertex) &&
+	    _localAlpha.contains(vertex) &&
+	    _localAlphaMode[vertex] == Actor::AlphaReplace) {
+		return _localAlpha[vertex];
+	} else {
+		return 1.0f;
+	}
 }
 
 void Actor::getBBoxInfo(Math::Vector3d &bboxPos, Math::Vector3d &bboxSize) const {
