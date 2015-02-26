@@ -902,7 +902,7 @@ Sector *Set::findPointSector(const Math::Vector3d &p, Sector::SectorType type) {
 int Set::findSectorSortOrder(const Math::Vector3d &p, Sector::SectorType type) {
 	int setup = getSetup();
 	int sortOrder = 0;
-	float minDist = 0.01f;
+	float minDist = 10.f;
 
 	for (int i = 0; i < _numSectors; i++) {
 		Sector *sector = _sectors[i];
